@@ -1,0 +1,362 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GoBang
+{
+    class GoBang
+    {
+        static void Main(string[] args)
+        {
+            ClassLibrary.Game game = new ClassLibrary.Game();
+            game.Begin();
+        }
+    }
+}
+
+namespace ClassLibrary
+{
+    public enum Chess : int
+    {
+        blank = 0,
+        white = 1,
+        black = 2
+    }
+    public enum State : int
+    {
+        init = 0,
+        start = 1,
+        pvp = 2,
+        pvc = 3,
+        pause = 4,
+        end = 5
+    }
+    public class ChessBoard
+    {
+        private Chess[,] map;  //棋盘
+        private bool IsThis(int x, int y, Chess chess)  //(x,y)处是否是chess
+        {
+            if ( x >= 0 && x < 10 && y >= 0 && y < 10 && map[x, y] == chess)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        protected void BlankChessBoard()  //初始化棋盘
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    map[i, j] = Chess.blank;
+                }
+            }
+        }
+        public ChessBoard()  //构造方法
+        {
+            map = new Chess[10, 10];
+            BlankChessBoard();
+        }
+        public void DrawChessBoard()  //画出整个棋盘
+        {
+            Console.Write("\n  ");
+            for (int i = 0; i < 10; i++)
+            {
+                Console.Write("   {0}", i);
+            }
+            Console.Write("\n");
+            for (int i = 0; i < 10; i++)
+            {
+                Console.Write("   -");
+                for (int j = 0; j < 10; j++)
+                {
+                    Console.Write("----");
+                }
+                Console.Write("\n");
+                Console.Write(" {0} | ", (char)('a' + i));
+                for (int j = 0; j < 10; j++)
+                {
+                    switch (this.map[j, i])  //画棋子
+                    {
+                        case Chess.blank:
+                            Console.Write(" ");
+                            break;
+                        case Chess.white:
+                            Console.Write("O");
+                            break;
+                        case Chess.black:
+                            Console.Write("@");
+                            break;
+                    }
+                    Console.Write(" | ");
+                }
+                Console.Write("\n");
+            }
+            Console.Write("   -");
+            for (int j = 0; j < 10; j++)
+            {
+                Console.Write("----");
+            }
+            Console.Write("\n");
+        }
+        public bool SetChess(int x, int y, Chess chess)  //在(x,y)处放置棋子
+        {
+            if (IsThis(x, y, Chess.blank))  //放置成功返回true
+            {
+                this.map[x, y] = chess;
+                return true;
+            }
+            else  //放置失败返回false
+            {
+                return false;
+            }
+        }
+        public bool IsFive(int x, int y, Chess chess)  //新放置的棋子是否与周围棋子构成五子
+        {
+            int i, j;
+            j = i = x;
+            while (IsThis(--i, y, chess)) ;
+            while (IsThis(++j, y, chess)) ;
+            if (j - i - 1 >= 5)  //左右侧构成五子
+                return true;
+
+            j = i = y;
+            while (IsThis(x, --i, chess)) ;
+            while (IsThis(x, ++j, chess)) ;
+            if (j - i - 1 >= 5)  //上下侧构成五子
+                return true;
+
+            i = j = 0;
+            do
+                i++;
+            while (IsThis(x - i, y - i, chess));
+            do
+                j++;
+            while (IsThis(x + j, y + j, chess));
+            if (j + i - 1 >= 5)  //左上到右下侧构成五子
+                return true;
+
+            i = j = 0;
+            do
+                i++;
+            while (IsThis(x + i, y - i, chess));
+            do
+                j++;
+            while (IsThis(x - j, y + j, chess));
+            if (j + i - 1 >= 5)  //左下到右下上侧构成五子
+                return true;
+
+            return false;
+        }
+    }
+    public sealed class Game : ChessBoard
+    {
+        private State state;
+        private void DrawWelcome()
+        {
+            Console.Write("\n\n");
+            for (int i = 0; i < 4; i++)
+            {
+                Console.Write("                    ");
+                Console.Write("********************");
+                Console.Write("********************");
+                Console.Write("********************");
+                Console.Write("********************");
+                Console.Write("\n");
+            }
+            Console.Write("                    ");
+            Console.Write("**********");
+            Console.Write("                              ");
+            Console.Write("                              ");
+            Console.Write("**********");
+            Console.Write("\n");
+            Console.Write("                    ");
+            Console.Write("**********");
+            Console.Write("              five chesses    ");
+            Console.Write("  by geng xinkuang            ");
+            Console.Write("**********");
+            Console.Write("\n");
+            Console.Write("                    ");
+            Console.Write("**********");
+            Console.Write("                              ");
+            Console.Write("                              ");
+            Console.Write("**********");
+            Console.Write("\n");
+            Console.Write("                    ");
+            Console.Write("**********");
+            Console.Write("     more codes please enter into github.com/gengxk628/     ");
+            Console.Write("**********");
+            Console.Write("\n");
+            Console.Write("                    ");
+            Console.Write("**********");
+            Console.Write("                              ");
+            Console.Write("                              ");
+            Console.Write("**********");
+            Console.Write("\n");
+            Console.Write("                    ");
+            Console.Write("**********");
+            Console.Write("                     2019/2/1    ver 0.1.0                  ");
+            Console.Write("**********");
+            Console.Write("\n");
+            Console.Write("                    ");
+            Console.Write("**********");
+            Console.Write("                              ");
+            Console.Write("                              ");
+            Console.Write("**********");
+            Console.Write("\n");
+            Console.Write("                    ");
+            Console.Write("**********");
+            Console.Write("               please press any key to start                ");
+            Console.Write("**********");
+            Console.Write("\n");
+            Console.Write("                    ");
+            Console.Write("**********");
+            Console.Write("                              ");
+            Console.Write("                              ");
+            Console.Write("**********");
+            Console.Write("\n");
+            for (int i = 0; i < 4; i++)
+            {
+                Console.Write("                    ");
+                Console.Write("********************");
+                Console.Write("********************");
+                Console.Write("********************");
+                Console.Write("********************");
+                Console.Write("\n");
+            }
+        }
+        private void Choose()  //选择模式
+        {
+            Console.Write("\n请选择对战模式！pvp请键入0，pvc请键入1：");
+            char listener;
+            listener = Console.ReadKey().KeyChar;
+            if (listener == '1')
+            {
+                this.state = State.pvc;
+            }
+            else
+            {
+                this.state = State.pvp;
+            }
+
+        }
+        private void PVPGame()
+        {
+            int x, y;
+            do
+            {
+                DrawChessBoard();
+                do  //放子失败则继续放子
+                {
+                    Console.WriteLine("请白子玩家落子");
+                    GetXY(out x, out y);
+                }
+                while (!SetChess(x, y, Chess.white));
+                if (IsFive(x, y, Chess.white))
+                {
+                    DrawChessBoard();
+                    Console.WriteLine("白子玩家胜");
+                    break;
+                }
+                DrawChessBoard();
+                do  //放子失败则继续放子
+                {
+                    Console.WriteLine("请黑子玩家落子");
+                    GetXY(out x, out y);
+                }
+                while (!SetChess(x, y, Chess.black));
+                if (IsFive(x, y, Chess.black))
+                {
+                    DrawChessBoard();
+                    Console.WriteLine("黑子玩家胜");
+                    break;
+                }
+            } while (true);
+            this.state = State.pause;
+        }
+        private void PVCGame()
+        {
+            Console.WriteLine("\nPVC模式正在完善中，请重新选择！");
+            this.state = State.start;
+        }
+        private void MainLoop()  //游戏主循环
+        {
+            switch (this.state)  //根据游戏状态改变动作
+            {
+                case State.init:
+                    DrawWelcome();
+                    Console.ReadKey();
+                    this.state = State.start;
+                    break;
+                case State.start:
+                    BlankChessBoard();  //清空棋盘
+                    Choose();  //选择模式
+                    break;
+                case State.pvp:
+                    PVPGame();
+                    break;
+                case State.pvc:
+                    PVCGame();
+                    break;
+                case State.pause:
+                    Console.WriteLine("退出请输入0，再来一局请输入1：");
+                    if (Console.ReadKey().KeyChar == '1')
+                    {
+                        this.state = State.start;
+                    }
+                    else
+                    {
+                        this.state = State.end;
+                    }
+                    break;
+                case State.end:
+                    break;
+            }
+        }
+        private void GetXY(out int x, out int y)  //在控制台接受落子坐标
+        {
+            char cx, cy;
+            Console.Write("请输入你落子的横坐标：");
+            cx = Console.ReadKey().KeyChar;
+            Console.Write("\n");
+            while (!(cx >= '0' && cx <= '9'))
+            {
+                Console.Write("输入有误，请再次输入你落子的横坐标：");
+                cx = Console.ReadKey().KeyChar;
+                Console.Write("\n");
+            }
+            Console.Write("请输入你落子的纵坐标：");
+            cy = Console.ReadKey().KeyChar;
+            Console.Write("\n");
+            while (!(cy >= 'a' && cy <= 'j'))
+            {
+                Console.Write("输入有误，请再次输入你落子的纵坐标：");
+                cy = Console.ReadKey().KeyChar;
+                Console.Write("\n");
+            }
+            x = (int)(cx - '0');
+            y = (int)(cy - 'a');
+        }
+        public Game() : base()
+        {
+            this.state = State.init;
+        }
+        public void Begin()
+        {
+            do
+            {
+                MainLoop();
+                if (this.state == State.end)
+                {
+                    break;
+                }
+            }
+            while (true);
+        }
+    }
+}
