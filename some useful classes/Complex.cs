@@ -1,19 +1,20 @@
 ///
-///A class to operate on complex numbers
-///Programming by Geng Xinkuang
-///email: 1326846851@qq.com
+/// A class to operate on complex numbers
+/// Programming by Geng Xinkuang
+/// email: 1326846851@qq.com
+/// github: github.com/gengxk628/
 ///
 using System;
 using System.Collections.Generic;
 
-namespace Complex
+namespace exp1
 {
     /// <summary>
     /// 操作复数的类
     /// A class to operate on complex numbers
     /// 
     /// @author Geng Xinkuang
-    /// @version 1.0
+    /// @version 2.0
     /// </summary>
     public class Complex:IComparable
     {
@@ -96,10 +97,16 @@ namespace Complex
             rp = sc.rp;
             ip = sc.ip;
         }
-        public static implicit operator double(Complex c)
-        {
-            return c.Abs();
-        }
+        //
+        // 摘要:
+        //     double到Complex隐式转换
+        // 
+        // 参数:
+        //   other:
+        //     用于比较的复数
+        //
+        // 返回结果:
+        //     bool类型，比较的结果
         public static implicit operator Complex(double c)
         {
             return new Complex(c, 0);
@@ -122,6 +129,35 @@ namespace Complex
                 s = rp.ToString() + ip.ToString() + "i";
             }
             return s;
+        }
+        //
+        // 摘要:
+        //     比较两个复数是否相等
+        // 
+        // 参数:
+        //   other:
+        //     用于比较的复数
+        //
+        // 返回结果:
+        //     bool类型，比较的结果
+        public override bool Equals(object other)
+        {
+            Complex c = other as Complex;
+            if (c == null)
+                return false;
+            return Math.Abs(rp - c.rp) <= eps &&
+                Math.Abs(ip - c.ip) <= eps;
+        }
+        //
+        // 摘要:
+        //     重写GetHashCode
+        // 
+        // 返回结果:
+        //     int类型，复数对象散列码
+        //
+        public override int GetHashCode()
+        {
+            return (int)this.Abs();
         }
         //
         // 摘要:
@@ -149,10 +185,28 @@ namespace Complex
         //
         //   ip:
         //     复数的虚部
-        public void SetValue(double rp, double ip)
+        //
+        // 返回结果:
+        //     Complex类型，赋值的结果
+        public Complex SetValue(double rp, double ip)
         {
             this.rp = rp;
             this.ip = ip;
+            return this;
+        }
+        //
+        // 摘要:
+        //     重载 ~ 运算符
+        //
+        // 参数:
+        //   c:
+        //     需要取共轭的复数
+        //
+        // 返回结果:
+        //     Complex类型，该复数的共轭复数
+        public static Complex operator ~(Complex c)
+        {
+            return new Complex(c.rp, -c.ip);
         }
         //
         // 摘要:
@@ -195,6 +249,7 @@ namespace Complex
         // 参数:
         //   c1:
         //     加数
+        //
         //   c2:
         //     加数
         //
@@ -212,6 +267,7 @@ namespace Complex
         // 参数:
         //   c1:
         //     减数
+        //
         //   c2:
         //     减数
         //
@@ -229,6 +285,7 @@ namespace Complex
         // 参数:
         //   c1:
         //     乘数
+        //
         //   c2:
         //     乘数
         //
@@ -246,6 +303,7 @@ namespace Complex
         // 参数:
         //   c1:
         //     被除数
+        //
         //   c2:
         //     除数
         //
@@ -448,7 +506,7 @@ namespace Complex
         }
         //
         // 摘要:
-        //     实现IComparable接口
+        //     实现IComparable接口，按复数模的大小比较
         public int CompareTo(object obj)
         {
             Complex c = obj as Complex;
@@ -456,7 +514,7 @@ namespace Complex
             {
                 throw new ArgumentException("CompareTo（Complex）");
             }
-            if (Math.Abs(Abs() - c.Abs()) < eps)
+            if (this.Equals(c))
             {
                 return 0;
             }
